@@ -72,7 +72,7 @@ void PlotSample::update_data()
           QRegExp rx = QRegExp("\\s+");
           if (line.size() < 1) continue;
           if (line[0] == '#') {
-              info_ << line;
+              info_ << line.mid(2, line.size() - 2);
           } else {
               pt = line.split(rx, QString::SkipEmptyParts);
               if (pt.size() != 2) throw
@@ -95,8 +95,21 @@ void PlotSample::update_data()
        inputFile.close();
     } else throw std::runtime_error("File wasn't open");
 
+    if (data_x_.size() < 1)
+        throw std::runtime_error("No measurements\' data.");
+
     double xscale = xmax - xmin;
+    if (xscale <= std::numeric_limits<double>::min()) {
+        xmin -=1;
+        xscale = 2;
+    }
+
     double yscale = ymax - ymin;
+    if (yscale <= std::numeric_limits<double>::min()) {
+        ymin -=1;
+        yscale = 2;
+    }
+
     // norm points right after getting
     for (int idx = 0; idx < data_x_.size(); idx++) {
         data_x_[idx] -= xmin;
