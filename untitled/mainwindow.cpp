@@ -100,7 +100,7 @@ void MainWindow::on_pushButton_4_clicked()
     for (auto& item: items ) {
         QString name = item->text();
         try {
-            m_windows[m_id[name]]->update();
+            m_windows[m_id[name]]->update_data();
             QMessageBox::information(this, "Updated:" + name, m_windows[m_id[name]]->getInfo());
         } catch (std::exception& msg) {
             QMessageBox::critical(this,"Error", msg.what());

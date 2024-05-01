@@ -64,6 +64,7 @@ void PlotSample::update_data()
        QTextStream in(&inputFile);
        data_x_.clear();
        data_y_.clear();
+       info_.clear();
 
        while (!in.atEnd())
        {
@@ -119,7 +120,7 @@ void PlotSample::update_data()
     }
     origin = {xmin, ymin};
     scale  = {xscale, yscale};
-
+    this->update();
 }
 
 QString PlotSample::getInfo() {
@@ -149,20 +150,20 @@ void PlotSample::paintEvent(QPaintEvent* event)
     double h = height();
     double w = width();
 
-    for (int idx = 0; idx < data_x_.size(); idx++) {
-        QPointF tmp {data_x_[idx] * w, data_y_[idx] * h};
-        paint.drawPoint(tmp);
-        if (idx <data_x_.size()-1) {
-            double x1 = data_x_[idx+1]*w, y1 = data_y_[idx+1]*h;
-            paint.drawLine(tmp, {x1, y1});
-        }
+    QPointF p0, p1;
+    if (!data_x_.size()) return;
+    p0 = QPointF{data_x_[0] * w, data_y_[0] * h};
+    paint.drawPoint(p0);
+    for (int idx = 1; idx < data_x_.size(); idx++) {
+        p1 = QPointF {data_x_[idx] * w, data_y_[idx] * h};
+        paint.drawLine(p0, p1);
+        paint.drawPoint(p1);
+        p0 = p1;
     }
 
     paint.end();
-    if (withGrid_) addGrid();
-    if (withLabels_) {
-        addLabels();
-    }
+    if (withGrid_)   addGrid();
+    if (withLabels_) addLabels();
     this->show();
 }
 
