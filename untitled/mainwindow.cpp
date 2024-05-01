@@ -64,9 +64,10 @@ void MainWindow::on_pushButton_3_clicked()
 {
     const auto& items = ui->listWidget->selectedItems();
 
-    if (items.size() != 1) {
-        // do nothing
-    } else {
+    if (items.size() < 1) {
+        QMessageBox::warning(this, "No selection!", "0 files were chosen.");
+        return;
+    } else if (items.size() == 1) {
         QString name = items.first()->text();
 
         m_windows[m_id[name]]->show();
@@ -97,6 +98,10 @@ void MainWindow::on_pushButton_5_clicked()
 void MainWindow::on_pushButton_4_clicked()
 {
     const auto& items = ui->listWidget->selectedItems();
+    if (items.size() < 1) {
+        QMessageBox::warning(this, "No selection!", "0 files were chosen.");
+        return;
+    }
     for (auto& item: items ) {
         QString name = item->text();
         try {
@@ -112,6 +117,10 @@ void MainWindow::on_pushButton_4_clicked()
 void MainWindow::on_pushButton_2_clicked()
 {
     const auto& items = ui->listWidget->selectedItems();
+    if (items.size() < 1) {
+        QMessageBox::warning(this, "No selection!", "0 files were chosen.");
+        return;
+    }
     for (auto& item: items ) {
         QString name = item->text();
         int flag = QMessageBox::question(this, "Closing file", "Do you want to close file:\n" + name, QMessageBox::Yes, QMessageBox::No);
@@ -139,6 +148,10 @@ void MainWindow::on_pushButton_clicked()
 void MainWindow::on_checkBox_2_toggled(bool checked)
 {
     const auto& items = ui->listWidget->selectedItems();
+    if (items.size() < 1) {
+        ui->checkBox_2->setChecked(false);
+        return;
+    }
     for (auto& item: items ) {
         QString name = item->text();
         m_windows[m_id[name]]->setGridFlag(checked);
@@ -148,6 +161,10 @@ void MainWindow::on_checkBox_2_toggled(bool checked)
 void MainWindow::on_checkBox_toggled(bool checked)
 {
     const auto& items = ui->listWidget->selectedItems();
+    if (items.size() < 1) {
+        ui->checkBox->setChecked(false);
+        return;
+    }
     for (auto& item: items ) {
         QString name = item->text();
         m_windows[m_id[name]]->setLabelFlag(checked);
