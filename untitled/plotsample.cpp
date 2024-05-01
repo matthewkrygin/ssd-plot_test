@@ -64,6 +64,7 @@ void PlotSample::update_data()
        QTextStream in(&inputFile);
        data_x_.clear();
        data_y_.clear();
+       info_.clear();
 
        while (!in.atEnd())
        {
@@ -72,7 +73,7 @@ void PlotSample::update_data()
           QRegExp rx = QRegExp("\\s+");
           if (line.size() < 1) continue;
           if (line[0] == '#') {
-              info_ << line;
+              info_ << line.mid(2, line.size() - 2);
           } else {
               pt = line.split(rx, QString::SkipEmptyParts);
               if (pt.size() != 2) throw
@@ -95,8 +96,21 @@ void PlotSample::update_data()
        inputFile.close();
     } else throw std::runtime_error("File wasn't open");
 
+    if (data_x_.size() < 1)
+        throw std::runtime_error("No measurements\' data.");
+
     double xscale = xmax - xmin;
+    if (xscale <= std::numeric_limits<double>::min()) {
+        xmin -=1;
+        xscale = 2;
+    }
+
     double yscale = ymax - ymin;
+    if (yscale <= std::numeric_limits<double>::min()) {
+        ymin -=1;
+        yscale = 2;
+    }
+
     // norm points right after getting
     for (int idx = 0; idx < data_x_.size(); idx++) {
         data_x_[idx] -= xmin;
@@ -106,7 +120,7 @@ void PlotSample::update_data()
     }
     origin = {xmin, ymin};
     scale  = {xscale, yscale};
-
+    this->update();
 }
 
 QString PlotSample::getInfo() {
@@ -136,20 +150,20 @@ void PlotSample::paintEvent(QPaintEvent* event)
     double h = height();
     double w = width();
 
-    for (int idx = 0; idx < data_x_.size(); idx++) {
-        QPointF tmp {data_x_[idx] * w, data_y_[idx] * h};
-        paint.drawPoint(tmp);
-        if (idx <data_x_.size()-1) {
-            double x1 = data_x_[idx+1]*w, y1 = data_y_[idx+1]*h;
-            paint.drawLine(tmp, {x1, y1});
-        }
+    QPointF p0, p1;
+    if (!data_x_.size()) return;
+    p0 = QPointF{data_x_[0] * w, data_y_[0] * h};
+    paint.drawPoint(p0);
+    for (int idx = 1; idx < data_x_.size(); idx++) {
+        p1 = QPointF {data_x_[idx] * w, data_y_[idx] * h};
+        paint.drawLine(p0, p1);
+        paint.drawPoint(p1);
+        p0 = p1;
     }
 
     paint.end();
-    if (withGrid_) addGrid();
-    if (withLabels_) {
-        addLabels();
-    }
+    if (withGrid_)   addGrid();
+    if (withLabels_) addLabels();
     this->show();
 }
 
